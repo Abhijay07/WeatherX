@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeatherX</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            transition: background 0.5s ease-in-out;
+        }
+        .weather-box {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .weather-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-br from-gray-100 to-gray-200">
+    <h1 class="text-4xl font-semibold text-gray-800 mb-8">WeatherX</h1>
+
+    <div class="w-full max-w-5xl bg-white rounded-3xl shadow-2xl p-10 text-center space-y-8">
+        <div class="flex flex-col items-center">
+            <img id="weatherIcon" src="https://openweathermap.org/img/wn/01d@2x.png" alt="Weather Icon" class="w-24 h-24">
+            <p id="weatherText" class="text-2xl font-medium text-gray-700 mt-3">Sunny</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
+            <div class="weather-box bg-gray-50 p-8 rounded-3xl shadow-md flex flex-col items-center">
+                <p id="temperature" class="text-xl font-semibold">Temperature: 25°C</p>
+            </div>
+            <div class="weather-box bg-gray-50 p-8 rounded-3xl shadow-md flex flex-col items-center">
+                <p id="humidity" class="text-xl font-semibold">Humidity: 60%</p>
+            </div>
+            <div class="weather-box bg-gray-50 p-8 rounded-3xl shadow-md flex flex-col items-center">
+                <p id="rain-status" class="text-xl font-semibold">Rain Status: No Rain</p>
+            </div>
+        </div>
+
+        <div class="w-full bg-gray-50 p-8 rounded-2xl shadow-md">
+            <canvas id="temperatureChart" class="w-full h-72 md:h-96"></canvas>
+        </div>
+        <div class="w-full bg-gray-50 p-8 rounded-2xl shadow-md">
+            <canvas id="humidityChart" class="w-full h-72 md:h-96"></canvas>
+        </div>
+        <div class="w-full bg-gray-50 p-8 rounded-2xl shadow-md">
+            <canvas id="rainChart" class="w-full h-72 md:h-96"></canvas>
+        </div>
+    </div>
+
+    <script>
+        function updateBackground(weather) {
+            let body = document.body;
+            if (weather === "Sunny") {
+                body.style.background = "linear-gradient(to bottom right, #ffeb99, #ffcc66)";
+            } else if (weather === "Cloudy") {
+                body.style.background = "linear-gradient(to bottom right, #d3d3d3, #808080)";
+            } else if (weather === "Rainy") {
+                body.style.background = "linear-gradient(to bottom right, #87CEEB, #4682B4)";
+            }
+        }
+
+        function updateWeather(weather) {
+            let weatherIcon = document.getElementById("weatherIcon");
+            let weatherText = document.getElementById("weatherText");
+
+            if (weather === "Sunny") {
+                weatherIcon.src = "https://openweathermap.org/img/wn/01d@2x.png";
+                weatherText.textContent = "Sunny";
+            } else if (weather === "Cloudy") {
+                weatherIcon.src = "https://openweathermap.org/img/wn/03d@2x.png";
+                weatherText.textContent = "Cloudy";
+            } else if (weather === "Rainy") {
+                weatherIcon.src = "https://openweathermap.org/img/wn/10d@2x.png";
+                weatherText.textContent = "Rainy";
+            }
+
+            updateBackground(weather);
+        }
+
+        const createChart = (id, label, data, color) => {
+            const ctx = document.getElementById(id).getContext('2d');
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '06:00', '12:00', '18:00', '24:00'],
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        borderColor: color,
+                        borderWidth: 2,
+                        fill: false // Remove shading
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { grid: { color: 'rgba(0,0,0,0.1)' } }
+                    }
+                }
+            });
+        };
+
+        createChart('temperatureChart', 'Temperature (°C)', [22, 24, 27, 26, 23], 'red');
+        createChart('humidityChart', 'Humidity (%)', [60, 62, 65, 70, 68], 'blue');
+        createChart('rainChart', 'Rainfall (mm)', [0, 2, 5, 1, 0], 'green');
+
+        setInterval(function(){
+            const weathers = ["Sunny", "Cloudy", "Rainy"];
+            const weather = weathers[Math.floor(Math.random() * weathers.length)];
+            updateWeather(weather);
+        }, 5000);
+    </script>
+</body>
+</html>
