@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WeatherX</title>
+
     <link rel="icon" type="image/png" href="WeatherX-Icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,76 +15,112 @@
         body {
             font-family: 'Poppins', sans-serif;
             transition: background 0.5s ease-in-out;
+            background-size: cover;
+            background-position: center;
+            background-color: #b0bec5;
         }
-        .weather-box {
+        .glass-box {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         }
-        .weather-box:hover {
+        .glass-box:hover {
             transform: translateY(-5px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+        }
+        .dark-mode {
+            background-color: #1e293b;
+            color: white;
+        }
+        .icon-style {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 0.5rem;
+        }
+        .toggle-button {
+            background-color: rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .dark-mode .chart-axis line,
+        .dark-mode .chart-axis path,
+        .dark-mode .chart-axis text {
+            stroke: white;
+            fill: white;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-br from-gray-100 to-gray-200">
-    <h1 class="text-4xl font-semibold text-gray-800 mb-8">WeatherX</h1>
+<body class="min-h-screen flex flex-col items-center justify-center px-4 pt-24">
+    <!-- Navbar -->
+    <nav class="fixed top-0 left-0 w-full bg-white/30 backdrop-blur-md shadow-md z-50 px-6 py-4 flex items-center justify-between">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">WeatherX</h1>
+        <button class="toggle-button text-sm md:text-base" onclick="toggleMode()">Toggle Mode</button>
+    </nav>
 
-    <div class="w-full max-w-5xl bg-white rounded-3xl shadow-2xl p-10 text-center space-y-8">
-        <div class="flex flex-col items-center">
+    <div id="mainContainer" class="w-full max-w-5xl rounded-3xl p-10 text-center space-y-20">
+        <div class="glass-box flex flex-col items-center justify-center space-y-3">
             <img id="weatherIcon" src="https://openweathermap.org/img/wn/01d@2x.png" alt="Weather Icon" class="w-24 h-24">
-            <p id="weatherText" class="text-2xl font-medium text-gray-700 mt-3">Sunny</p>
+            <p id="weatherText" class="text-2xl font-medium text-gray-900">Sunny</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
-            <div class="weather-box bg-gray-50 p-8 rounded-3xl shadow-md flex flex-col items-center">
-                <p id="temperature" class="text-xl font-semibold">Temperature: 25°C</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 w-full">
+            <div class="glass-box flex flex-col items-center justify-center space-y-2">
+                <img src="https://cdn-icons-png.flaticon.com/512/869/869869.png" class="icon-style" alt="Temperature Icon">
+                <p id="temperature" class="text-xl font-semibold text-center text-gray-800">Temperature: 25°C</p>
             </div>
-            <div class="weather-box bg-gray-50 p-8 rounded-3xl shadow-md flex flex-col items-center">
-                <p id="humidity" class="text-xl font-semibold">Humidity: 60%</p>
+            <div class="glass-box flex flex-col items-center justify-center space-y-2">
+                <img src="https://cdn-icons-png.flaticon.com/512/728/728093.png" class="icon-style" alt="Humidity Icon">
+                <p id="humidity" class="text-xl font-semibold text-center text-gray-800">Humidity: 60%</p>
             </div>
-            <div class="weather-box bg-gray-50 p-8 rounded-3xl shadow-md flex flex-col items-center">
-                <p id="rain-status" class="text-xl font-semibold">Rain Status: No Rain</p>
+            <div class="glass-box flex flex-col items-center justify-center space-y-2">
+                <img src="https://cdn-icons-png.flaticon.com/512/1163/1163624.png" class="icon-style" alt="Rain Icon">
+                <p id="rain-status" class="text-xl font-semibold text-center text-gray-800">Rain Status: No Rain</p>
             </div>
         </div>
 
-        <div class="w-full bg-gray-50 p-8 rounded-2xl shadow-md">
-            <canvas id="temperatureChart" class="w-full h-72 md:h-96"></canvas>
-        </div>
-        <div class="w-full bg-gray-50 p-8 rounded-2xl shadow-md">
-            <canvas id="humidityChart" class="w-full h-72 md:h-96"></canvas>
-        </div>
-         <div class="w-full bg-gray-50 p-8 rounded-2xl shadow-md">
-            <canvas id="rainChart" class="w-full h-72 md:h-96"></canvas>
+        <div class="grid grid-cols-1 gap-20 w-full">
+            <div class="glass-box">
+                <canvas id="temperatureChart" class="w-full h-72 md:h-96"></canvas>
+            </div>
+            <div class="glass-box">
+                <canvas id="humidityChart" class="w-full h-72 md:h-96"></canvas>
+            </div>
+            <div class="glass-box">
+                <canvas id="rainChart" class="w-full h-72 md:h-96"></canvas>
+            </div>
         </div>
     </div>
 
     <script>
-        function updateBackground(weather) {
-            let body = document.body;
-            if (weather === "Sunny") {
-                body.style.background = "linear-gradient(to bottom right, #ffeb99, #ffcc66)";
-            } else if (weather === "Cloudy") {
-                body.style.background = "linear-gradient(to bottom right, #d3d3d3, #808080)";
-            } else if (weather === "Rainy") {
-                body.style.background = "linear-gradient(to bottom right, #87CEEB, #4682B4)";
-            }
-        }
-
         function updateWeather(weather) {
-            let weatherIcon = document.getElementById("weatherIcon");
-            let weatherText = document.getElementById("weatherText");
+            const weatherIcon = document.getElementById("weatherIcon");
+            const weatherText = document.getElementById("weatherText");
+            const body = document.body;
+            const container = document.getElementById("mainContainer");
 
             if (weather === "Sunny") {
                 weatherIcon.src = "https://openweathermap.org/img/wn/01d@2x.png";
                 weatherText.textContent = "Sunny";
+                body.style.backgroundImage = "url('https://source.unsplash.com/1600x900/?sunny,sky')";
+                container.style.backgroundColor = "rgba(255, 255, 255, 0.2)";
             } else if (weather === "Cloudy") {
                 weatherIcon.src = "https://openweathermap.org/img/wn/03d@2x.png";
                 weatherText.textContent = "Cloudy";
+                body.style.backgroundImage = "url('https://source.unsplash.com/1600x900/?cloudy,sky')";
+                container.style.backgroundColor = "rgba(240, 240, 240, 0.3)";
             } else if (weather === "Rainy") {
                 weatherIcon.src = "https://openweathermap.org/img/wn/10d@2x.png";
                 weatherText.textContent = "Rainy";
+                body.style.backgroundImage = "url('https://source.unsplash.com/1600x900/?rainy,sky')";
+                container.style.backgroundColor = "rgba(220, 230, 250, 0.3)";
             }
-
-            updateBackground(weather);
         }
 
         const createChart = (id, label, data, color) => {
@@ -97,7 +134,7 @@
                         data: data,
                         borderColor: color,
                         borderWidth: 2,
-                        fill: false // Remove shading
+                        fill: false
                     }]
                 },
                 options: {
@@ -108,8 +145,14 @@
                         easing: 'easeInOutQuart'
                     },
                     scales: {
-                        x: { grid: { display: false } },
-                        y: { grid: { color: 'rgba(0,0,0,0.1)' } }
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.2)' },
+                            ticks: { color: 'white' }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.2)' },
+                            ticks: { color: 'white' }
+                        }
                     }
                 }
             });
@@ -124,6 +167,10 @@
             const weather = weathers[Math.floor(Math.random() * weathers.length)];
             updateWeather(weather);
         }, 5000);
+
+        function toggleMode() {
+            document.body.classList.toggle("dark-mode");
+        }
     </script>
 </body>
 </html>
