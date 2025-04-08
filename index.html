@@ -1,212 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WeatherX</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WeatherX</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      transition: background-color 0.3s ease;
+      background: linear-gradient(to bottom, #d0eaff, #ffffff);
+    }
 
-    <link rel="icon" type="image/png" href="WeatherX-Icon.png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+    .dark-mode {
+      background: #2c3e50;
+    }
 
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            transition: background 0.5s ease-in-out;
-            background-size: cover;
-            background-position: center;
-            background-color: #b0bec5;
-        }
-        .glass-box {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            backdrop-filter: blur(20px);
-            background: rgba(255, 255, 255, 0.25);
-            border-radius: 1rem;
-            padding: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        }
-        .glass-box:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
-        }
-        .dark-mode {
-            background-color: #1e293b;
-            color: white;
-        }
-        .icon-style {
-            width: 48px;
-            height: 48px;
-            margin-bottom: 0.5rem;
-        }
-        .toggle-button {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background-color: rgba(255,255,255,0.3);
-            backdrop-filter: blur(10px);
-            border: none;
-            padding: 10px 20px;
-            border-radius: 1rem;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .dark-mode .chart-axis line,
-        .dark-mode .chart-axis path,
-        .dark-mode .chart-axis text {
-            stroke: white;
-            fill: white;
-        }
-    </style>
+    .glass-box {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 15px;
+      padding: 15px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #000;
+      text-align: center;
+      flex: 1 1 200px;
+      max-width: 250px;
+    }
+
+    .dark-mode .glass-box {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      padding: 20px;
+    }
+
+    .data-row {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .clock-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+    }
+
+    #clock {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    canvas {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+    }
+
+    .dark-mode canvas {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+  </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center px-4">
-    <button class="toggle-button" onclick="toggleMode()">Toggle Mode</button>
-    <h1 class="text-4xl font-semibold text-gray-800 mb-8">WeatherX</h1>
 
-    <div id="mainContainer" class="w-full max-w-5xl rounded-3xl p-10 text-center space-y-20">
-        <div class="glass-box draggable flex flex-col items-center justify-center space-y-3" style="position:absolute; top:80px; left:80px;">
-            <img id="weatherIcon" src="https://openweathermap.org/img/wn/01d@2x.png" alt="Weather Icon" class="w-24 h-24">
-            <p id="weatherText" class="text-2xl font-medium text-gray-900">Sunny</p>
-        </div>
+<body>
+  <button onclick="toggleMode()" style="position: absolute; top: 10px; right: 20px; padding: 5px 10px; border-radius: 10px;">Toggle Mode</button>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 w-full">
-            <div class="glass-box draggable flex flex-col items-center justify-center space-y-2" style="position:absolute; top:240px; left:80px;">
-                <img src="https://cdn-icons-png.flaticon.com/512/869/869869.png" class="icon-style" alt="Temperature Icon">
-                <p id="temperature" class="text-xl font-semibold text-center text-gray-800">Temperature: 25°C</p>
-            </div>
-            <div class="glass-box draggable flex flex-col items-center justify-center space-y-2" style="position:absolute; top:240px; left:320px;">
-                <img src="https://cdn-icons-png.flaticon.com/512/728/728093.png" class="icon-style" alt="Humidity Icon">
-                <p id="humidity" class="text-xl font-semibold text-center text-gray-800">Humidity: 60%</p>
-            </div>
-            <div class="glass-box draggable flex flex-col items-center justify-center space-y-2" style="position:absolute; top:240px; left:560px;">
-                <img src="https://cdn-icons-png.flaticon.com/512/1163/1163624.png" class="icon-style" alt="Rain Icon">
-                <p id="rain-status" class="text-xl font-semibold text-center text-gray-800">Rain Status: No Rain</p>
-            </div>
-        </div>
+  <div class="clock-container">
+    <div class="glass-box" id="clock"></div>
+  </div>
 
-        <div class="grid grid-cols-1 gap-20 w-full pt-[400px]">
-            <div class="glass-box draggable" style="position:absolute; top:460px; left:60px; width:600px;">
-                <canvas id="temperatureChart" class="w-full h-72 md:h-96"></canvas>
-            </div>
-            <div class="glass-box draggable" style="position:absolute; top:860px; left:60px; width:600px;">
-                <canvas id="humidityChart" class="w-full h-72 md:h-96"></canvas>
-            </div>
-            <div class="glass-box draggable" style="position:absolute; top:1260px; left:60px; width:600px;">
-                <canvas id="rainChart" class="w-full h-72 md:h-96"></canvas>
-            </div>
-        </div>
+  <div class="data-row">
+    <div class="glass-box">
+      <img src="https://www.svgrepo.com/show/353722/rain-cloud-weather.svg" alt="Weather Icon" width="40"><br>
+      <strong>Weather:</strong> Rainy
     </div>
+    <div class="glass-box">
+      <img src="https://www.svgrepo.com/show/430433/temperature-sun.svg" alt="Temperature Icon" width="40">
+      <p><strong>Temperature:</strong> 25°C</p>
+    </div>
+  </div>
+  <div class="data-row">
+    <div class="glass-box">
+      <img src="https://www.svgrepo.com/show/430438/humidity.svg" alt="Humidity Icon" width="40">
+      <p><strong>Humidity:</strong> 60%</p>
+    </div>
+    <div class="glass-box">
+      <img src="https://www.svgrepo.com/show/430424/rainy-weather.svg" alt="Rain Status Icon" width="40">
+      <p><strong>Rain Status:</strong> No Rain</p>
+    </div>
+  </div>
 
-    <script>
-        function updateWeather(weather) {
-            const weatherIcon = document.getElementById("weatherIcon");
-            const weatherText = document.getElementById("weatherText");
-            const body = document.body;
-            const container = document.getElementById("mainContainer");
+  <div class="container">
+    <canvas id="temperatureChart" width="300" height="200"></canvas>
+    <canvas id="humidityChart" width="300" height="200"></canvas>
+    <canvas id="rainChart" width="300" height="200"></canvas>
+  </div>
 
-            if (weather === "Sunny") {
-                weatherIcon.src = "https://openweathermap.org/img/wn/01d@2x.png";
-                weatherText.textContent = "Sunny";
-                body.style.backgroundImage = "url('https://source.unsplash.com/1600x900/?sunny,sky')";
-                container.style.backgroundColor = "rgba(255, 255, 255, 0.2)";
-            } else if (weather === "Cloudy") {
-                weatherIcon.src = "https://openweathermap.org/img/wn/03d@2x.png";
-                weatherText.textContent = "Cloudy";
-                body.style.backgroundImage = "url('https://source.unsplash.com/1600x900/?cloudy,sky')";
-                container.style.backgroundColor = "rgba(240, 240, 240, 0.3)";
-            } else if (weather === "Rainy") {
-                weatherIcon.src = "https://openweathermap.org/img/wn/10d@2x.png";
-                weatherText.textContent = "Rainy";
-                body.style.backgroundImage = "url('https://source.unsplash.com/1600x900/?rainy,sky')";
-                container.style.backgroundColor = "rgba(220, 230, 250, 0.3)";
+  <script>
+    function toggleMode() {
+      document.body.classList.toggle('dark-mode');
+      renderCharts();
+    }
+
+    function updateClock() {
+      const clock = document.getElementById("clock");
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const formattedHour = hours % 12 || 12;
+      const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+      const timeString = `${formattedHour}:${formattedMinutes} ${ampm}`;
+      const dateString = now.toLocaleDateString(undefined, {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
+      clock.textContent = `${dateString} | ${timeString}`;
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function createChart(id, label, data, color) {
+      const ctx = document.getElementById(id).getContext('2d');
+      return new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['00:00', '06:00', '12:00', '18:00', '24:00'],
+          datasets: [{
+            label: label,
+            data: data,
+            borderColor: color,
+            borderWidth: 2,
+            fill: false,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              ticks: {
+                color: document.body.classList.contains('dark-mode') ? '#fff' : '#000'
+              },
+              grid: {
+                color: 'rgba(255,255,255,0.2)'
+              }
+            },
+            y: {
+              ticks: {
+                color: document.body.classList.contains('dark-mode') ? '#fff' : '#000'
+              },
+              grid: {
+                color: 'rgba(255,255,255,0.2)'
+              }
             }
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: document.body.classList.contains('dark-mode') ? '#fff' : '#000'
+              }
+            }
+          }
         }
+      });
+    }
 
-        const createChart = (id, label, data, color) => {
-            const ctx = document.getElementById(id).getContext('2d');
-            return new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['00:00', '06:00', '12:00', '18:00', '24:00'],
-                    datasets: [{
-                        label: label,
-                        data: data,
-                        borderColor: color,
-                        borderWidth: 2,
-                        fill: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 1000,
-                        easing: 'easeInOutQuart'
-                    },
-                    scales: {
-                        x: {
-                            grid: { color: 'rgba(255, 255, 255, 0.2)' },
-                            ticks: { color: 'white' }
-                        },
-                        y: {
-                            grid: { color: 'rgba(255, 255, 255, 0.2)' },
-                            ticks: { color: 'white' }
-                        }
-                    }
-                }
-            });
-        };
+    let tempChart, humidityChart, rainChart;
 
-        createChart('temperatureChart', 'Temperature (°C)', [22, 24, 27, 26, 23], 'red');
-        createChart('humidityChart', 'Humidity (%)', [60, 62, 65, 70, 68], 'blue');
-        createChart('rainChart', 'Rainfall (mm)', [0, 2, 5, 1, 0], 'green');
+    function renderCharts() {
+      if (tempChart) tempChart.destroy();
+      if (humidityChart) humidityChart.destroy();
+      if (rainChart) rainChart.destroy();
 
-        setInterval(function(){
-            const weathers = ["Sunny", "Cloudy", "Rainy"];
-            const weather = weathers[Math.floor(Math.random() * weathers.length)];
-            updateWeather(weather);
-        }, 5000);
+      tempChart = createChart('temperatureChart', 'Temperature (°C)', [22, 24, 27, 26, 23], 'orange');
+      humidityChart = createChart('humidityChart', 'Humidity (%)', [60, 62, 65, 70, 68], 'blue');
+      rainChart = createChart('rainChart', 'Rainfall (mm)', [0, 2, 5, 1, 0], 'green');
+    }
 
-        function toggleMode() {
-            document.body.classList.toggle("dark-mode");
-        }
-
-        interact('.draggable')
-            .draggable({
-                listeners: {
-                    move(event) {
-                        const target = event.target;
-                        const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-                        const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-                        target.style.transform = `translate(${x}px, ${y}px)`;
-                        target.setAttribute('data-x', x);
-                        target.setAttribute('data-y', y);
-                    }
-                }
-            })
-            .resizable({
-                edges: { left: true, right: true, bottom: true, top: true },
-                listeners: {
-                    move(event) {
-                        let { x, y } = event.target.dataset;
-                        x = parseFloat(x) || 0;
-                        y = parseFloat(y) || 0;
-                        event.target.style.width = `${event.rect.width}px`;
-                        event.target.style.height = `${event.rect.height}px`;
-                        x += event.deltaRect.left;
-                        y += event.deltaRect.top;
-                        event.target.style.transform = `translate(${x}px, ${y}px)`;
-                        event.target.setAttribute('data-x', x);
-                        event.target.setAttribute('data-y', y);
-                    }
-                },
-                modifiers: [
-                    interact.modifiers.restrictSize({ min: { width: 100, height: 50 } })
-                ],
-                inertia: true
-            });
-    </script>
+    renderCharts();
+  </script>
 </body>
+
 </html>
